@@ -85,13 +85,15 @@
     }
     /* Main content layout: controls and preview area */
     .content {
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      gap: 20px;
-      width: 100%;
-      max-width: 1200px;
-    }
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+  max-width: 1200px;
+}
+
     /* Control Panels (left and right) */
     .controls {
       flex: 1 1 200px;
@@ -234,6 +236,7 @@
       .content {
         flex-direction: column;
         align-items: stretch;
+        padding: 0; 
       }
       .avatar-preview-area {
         order: -1;  /* show avatar preview above the controls */
@@ -255,6 +258,7 @@
       .button-group {
         justify-content: center;
       }
+
     }
     /* ===================================
    Responsive Footer
@@ -429,6 +433,49 @@
 .powered {
   font-family: 'Pacifico', cursive;
 }
+@media (max-width: 768px) {
+  /* Remove the default 20px padding on the sides */
+  body {
+    padding: 0 8px !important;
+  }
+
+  /* Tweak your main container so it isn’t also inset */
+  .main-container {
+    padding: 16px 0px !important;
+  }
+
+  /* If you still need a tiny bit of breathing room around controls */
+  .controls-left {
+    padding: 16px 0px !important;
+  }
+
+  /* And keep the avatar full‑width too */
+  .avatar-preview-area {
+    padding: 16px 0px !important;
+  }
+  .form-group label{
+    margin-left:12px !important;
+    
+  }
+  .form-group select {
+    margin-left:12px !important;
+    margin-right:12px!important;
+}
+.switch-label{
+    margin-left:12px !important;
+    
+}
+.switch {
+  margin-right: 12px !important;
+}
+}
+@media (min-width: 769px) {
+  .switch-label {
+    font-size: 0.70em!important;  /* adjust as needed (e.g. 12px, 0.7em, etc.) */
+  }
+  
+  
+}
   </style>
 </head>
 <body>
@@ -441,11 +488,11 @@
       </div>
     </div>
     <!-- Content area: Left Controls, Avatar Preview, Right Controls -->
-    <div class="content">
+    <div class="content"><div class="all-controls"></div>
       <!-- Left Control Panel -->
       <div class="controls controls-left">
         <div class="switch-group">
-          <span class="switch-label">Circle BG</span>
+          <span class="switch-label">Background  Circle</span>
           <label class="switch">
             <input type="checkbox" id="avatarStyleToggle" checked>
             <span class="slider"></span>
@@ -620,7 +667,7 @@
           </select>
         </div>
       </div>
-    </div>
+    </div></div>
   </div>
  <!-- BEGIN NEW FOOTER -->
  <footer class="site-footer">
@@ -646,6 +693,30 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   <script>
+function unifyOnMobile() {
+  // only do anything when on mobile
+  if (window.innerWidth > 768) return;
+
+  const leftPanel  = document.querySelector('.controls-left');
+  const rightPanel = document.querySelector('.controls-right');
+  if (!leftPanel || !rightPanel) return;
+
+  // only merge once
+  if (!rightPanel.dataset.merged) {
+    Array.from(rightPanel.children).forEach(ch => leftPanel.appendChild(ch));
+    rightPanel.dataset.merged = 'true';
+  }
+
+  // hide the empty right panel
+  rightPanel.style.display = 'none';
+  // stretch the left to full width
+  leftPanel.style.width = '100%';
+}
+
+// run on load and resize
+window.addEventListener('load',   unifyOnMobile);
+window.addEventListener('resize', unifyOnMobile);
+
     // Get references to DOM elements
     const avatarImage = document.getElementById('avatarImage');
     const styleToggle = document.getElementById('avatarStyleToggle');
@@ -714,7 +785,22 @@
       styleToggle.checked = Math.random() < 0.5;
       generateURL();
     });
-    
+
+const scrollTriggers = [
+  ...selectElements,
+  styleToggle
+];
+function scrollToAvatar() {
+  if (window.innerWidth <= 768) {
+    document
+      .querySelector('.avatar-preview-area')
+      .scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+scrollTriggers.forEach(el => {
+  el.addEventListener('change', scrollToAvatar);
+});
+
     // Show React Code snippet
     showReactBtn.addEventListener('click', () => {
       codeOutput.dataset.type = 'react';
