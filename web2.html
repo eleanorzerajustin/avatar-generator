@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Avataaars Generator</title>
+  <!-- Google Font: Quicksand for a friendly, modern look -->
+  <link href="https://fonts.googleapis.com/css?family=Quicksand:400,500,700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+
+  <style>
+    html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+    /* Base Styles and Background */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Quicksand', sans-serif;
+      background: linear-gradient(45deg, #FFDDE1, #DEEFFD);
+      min-height: 100vh;
+    }
+    /* Main container with fixed max-width */
+    .main-container {
+     
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+      /* Fade-in animation */
+      opacity: 0;
+      transform: scale(0.95);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .main-container.loaded {
+      opacity: 1;
+      transform: scale(1);
+    }
+    /* Top Bar – only the title and Randomize button (download options moved below avatar) */
+    .top-bar {
+      width: 100%;
+      padding: 10px 0;
+      margin-bottom: 20px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .top-bar h1 {
+      font-size: 1.5em;
+      color: #1c1a1a;
+      margin: 0;
+      font-weight: 700;
+    }
+    .button-group {
+      display: flex;
+      gap: 10px;
+    }
+    /* Buttons styling */
+    button {
+      font-family: 'Quicksand', sans-serif;
+      font-size: 1em;
+      font-weight: 600;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    /* Randomize button style */
+    #randomBtn {
+      background: #fefeff;
+      color: #2b2626;
+      border: 1px solid rgba(176,166,166,0.5);
+    }
+    /* Common hover effect for buttons */
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    /* Main content layout: controls and preview area */
+    .content {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 20px;
+      width: 100%;
+      max-width: 1200px;
+    }
+    /* Control Panels (left and right) */
+    .controls {
+      flex: 1 1 200px;
+      min-width: 200px;
+      max-width: 300px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 20px;
+      color: #fff;
+    }
+    .controls h2 {
+      font-size: 1.1em;
+      margin-top: 0;
+      color: #fff;
+      border-bottom: 1px solid rgba(255,255,255,0.3);
+      padding-bottom: 5px;
+      margin-bottom: 15px;
+    }
+    /* Form groups for each option */
+    .form-group {
+      margin-bottom: 15px;
+      display: flex;
+      flex-direction: column;
+    }
+    .form-group label {
+      margin-bottom: 5px;
+      font-size: 0.85em;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      color: rgb(14,14,15);
+      text-shadow: 0 0 2px rgba(0,0,0,0.2);
+      text-transform: uppercase;
+    }
+    .form-group select {
+      padding: 8px;
+      border-radius: 8px;
+      border: none;
+      background: rgba(255,255,255,0.4);
+      color: #716868;
+      font-size: 0.95em;
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 500;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      padding-right: 24px;
+    }
+    .form-group select:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.5);
+    }
+    /* Avatar Preview Panel */
+    .avatar-preview-area {
+      box-shadow: 10px 10px 15px rgba(158,151,151,0.2);
+      flex: 0 1 auto;
+      max-width: 400px;
+      padding: 20px;
+      text-align: center;
+      background: rgba(255,255,255,0.2);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 20px;
+    }
+    #avatarImage {
+      max-width: 100%;
+      height: auto;
+    }
+    /* Downloads section placed just below avatar image */
+    .downloads {
+      margin-top: 15px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
+    .downloads button {
+      padding: 8px 12px;
+      font-size: 0.9em;
+    }
+    /* Toggle Switch */
+    .switch-group {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .switch-label {
+      font-size: 0.85em;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      color: rgb(13,13,14);
+      text-transform: uppercase;
+      margin-right: 10px;
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgb(70 58 58 / 40%);
+      transition: .4s;
+      border-radius: 34px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: #FFF;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: #4D8FE6;
+    }
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+    /* Responsive adjustments for mobile */
+    @media (max-width: 768px) {
+      .content {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .avatar-preview-area {
+        order: -1;  /* show avatar preview above the controls */
+        margin-bottom: 20px;
+      }
+      .controls {
+        width: auto;
+        max-width: none;
+        margin-bottom: 20px;
+      }
+      .top-bar {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+      .top-bar h1 {
+        margin-bottom: 10px;
+      }
+      .button-group {
+        justify-content: center;
+      }
+    }
+    /* ===================================
+   Responsive Footer
+   =================================== */
+.site-footer {
+  /* Make the footer span the full width */
+  width: 100%;
+  /* Use the same or a very similar gradient as your background */
+ 
+    padding: 10px!important;
+    
+    text-align: center;
+    background: rgb(220,137,232)!important;
+    background: linear-gradient(141deg,rgba(220,137,232,1)0%,rgba(144,64,204,1)100%)!important;
+
+  /* Some padding for breathing room */
+  
+  /* Optional: If you want the text color to contrast better, pick a suitable color */
+  color: #333;
+  /* Slightly higher z-index in case you use fancy layering */
+  z-index: 10;
+}
+
+.footer-content {
+  /* Center the footer content horizontally; 
+     set a max-width if you want it aligned with your main container width */
+  max-width: 1000px;
+  margin: 0 auto;
+
+  /* Use flex for side-by-side items */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Left side text styling */
+.footer-left p {
+  margin: 0;
+  font-weight: 600;
+}
+
+.footer-left a {
+  text-decoration: none;
+  color: #333; /* or pick a color that contrasts well */
+  font-weight: 700;
+}
+
+/* Right side button styling */
+.footer-right button {
+  font-family: 'Quicksand', sans-serif;
+  font-size: 0.95em;
+  font-weight: 600;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #fefeff;
+  color: #2b2626;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid rgba(176,166,166,0.5);
+}
+
+.footer-right button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+/* ===================================
+   RESPONSIVENESS
+   =================================== */
+@media (max-width: 768px) {
+  .footer-content {
+    /* Stack items vertically on smaller screens */
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .footer-left {
+    margin-bottom: 10px;
+  }
+}
+@media (min-width: 1024px) {
+  .site-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+  /* If needed, reserve space for the footer so content doesn’t get covered.
+     Adjust the value (e.g., 80px) based on the actual height of your footer */
+  .main-container {
+    padding-bottom: 80px;
+  }
+}
+.footer-logo {
+  max-height: 50px;  /* adjust as needed */
+  height: auto;
+  width: auto;
+}
+/* Footer Base Styles */
+.site-footer {
+  width: 100%;
+  background: linear-gradient(45deg, #FFDDE1, #DEEFFD);
+  padding: 15px 20px;
+  color: #333;
+  z-index: 10;
+}
+
+.footer-content {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row;
+}
+
+/* Logo Styling */
+.footer-logo {
+  max-height: 50px;  /* Adjust as needed */
+  height: auto;
+  width: auto;
+}
+
+/* Copyright text styling */
+.footer-right p {
+  margin: 0;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 0.95em;
+  color: #fff;  /* White text color */
+  text-align: left;
+}
+@media (min-width: 769px) {
+  .footer-right {
+    text-align: left;  /* Keep text left-aligned on tablet and desktop */
+  }
+}
+@media (max-width: 768px) {
+  .footer-content {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+/* By default (mobile), spans remain inline */
+
+/* On desktop: Make the two text segments display as separate lines */
+@media (min-width: 1024px) {
+  .copyright .line1,
+  .copyright .line2 {
+    display: block;
+    
+  }
+  
+}
+
+/* Mobile Responsiveness for Footer Layout */
+@media (max-width: 768px) {
+    .copyright .line1,
+  .copyright .line2 {
+    display: block;
+    margin-right: 30px!important;
+  }
+  .footer-content {
+    flex-direction: row;
+    text-align: center;
+  }
+  .footer-left {
+    margin-bottom: 10px;
+  }
+}
+.powered {
+  font-family: 'Pacifico', cursive;
+}
+  </style>
+</head>
+<body>
+  <div class="main-container" id="mainContainer">
+    <!-- Top Bar with Title and Randomize Button only -->
+    <div class="top-bar">
+      <h1 style="font-family: 'Mate', cursive;">Avatar Generator</h1>
+      <div class="button-group">
+        <button id="randomBtn">Randomize</button>
+      </div>
+    </div>
+    <!-- Content area: Left Controls, Avatar Preview, Right Controls -->
+    <div class="content">
+      <!-- Left Control Panel -->
+      <div class="controls controls-left">
+        <div class="switch-group">
+          <span class="switch-label">Circle BG</span>
+          <label class="switch">
+            <input type="checkbox" id="avatarStyleToggle" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="form-group">
+          <label for="topType">Top Type</label>
+          <select id="topType">
+            <option value="NoHair">No Hair</option>
+            <option value="Eyepatch">Eyepatch</option>
+            <option value="Hat">Hat</option>
+            <option value="Hijab">Hijab</option>
+            <option value="Turban">Turban</option>
+            <option value="WinterHat1">Winter Hat 1</option>
+            <option value="WinterHat2">Winter Hat 2</option>
+            <option value="WinterHat3">Winter Hat 3</option>
+            <option value="WinterHat4">Winter Hat 4</option>
+            <option value="LongHairBigHair">Long Hair Big</option>
+            <option value="LongHairBob">Long Hair Bob</option>
+            <option value="LongHairBun">Long Hair Bun</option>
+            <option value="LongHairCurly">Long Hair Curly</option>
+            <option value="LongHairCurvy">Long Hair Curvy</option>
+            <option value="LongHairDreads">Long Hair Dreads</option>
+            <option value="LongHairFrida">Long Hair Frida</option>
+            <option value="LongHairFro">Long Hair Fro</option>
+            <option value="LongHairFroBand">Long Hair Fro Band</option>
+            <option value="LongHairNotTooLong">Long Hair Not Too Long</option>
+            <option value="LongHairShavedSides">Long Hair Shaved Sides</option>
+            <option value="LongHairMiaWallace">Long Hair MiaWallace</option>
+            <option value="LongHairStraight">Long Hair Straight</option>
+            <option value="LongHairStraight2">Long Hair Straight 2</option>
+            <option value="ShortHairShaggyMullet">Short Hair Shaggy Mullet</option>
+            <option value="ShortHairShortCurly">Short Hair Short Curly</option>
+            <option value="ShortHairShortFlat">Short Hair Short Flat</option>
+            <option value="ShortHairShortRound">Short Hair Short Round</option>
+            <option value="ShortHairShortWaved">Short Hair Short Waved</option>
+            <option value="ShortHairSides">Short Hair Sides</option>
+            <option value="ShortHairTheCaesar">Short Hair The Caesar</option>
+            <option value="ShortHairTheCaesarSidePart">Short Hair Caesar Side</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="accessoriesType">Accessories</label>
+          <select id="accessoriesType">
+            <option value="Blank">Blank</option>
+            <option value="Kurt">Kurt</option>
+            <option value="Prescription01">Prescription 01</option>
+            <option value="Prescription02">Prescription 02</option>
+            <option value="Round">Round</option>
+            <option value="Sunglasses">Sunglasses</option>
+            <option value="Wayfarers">Wayfarers</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="hairColor">Hair Color</label>
+          <select id="hairColor">
+            <option value="Auburn">Auburn</option>
+            <option value="Black">Black</option>
+            <option value="Blonde">Blonde</option>
+            <option value="BlondeGolden">Blonde Golden</option>
+            <option value="Brown">Brown</option>
+            <option value="BrownDark">Brown Dark</option>
+            <option value="PastelPink">Pastel Pink</option>
+            <option value="Blue">Blue</option>
+            <option value="Platinum">Platinum</option>
+            <option value="Red">Red</option>
+            <option value="SilverGray">Silver Gray</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="facialHairType">Facial Hair</label>
+          <select id="facialHairType">
+            <option value="Blank">Blank</option>
+            <option value="BeardMedium">Beard Medium</option>
+            <option value="BeardLight">Beard Light</option>
+            <option value="BeardMajestic">Beard Majestic</option>
+            <option value="MoustacheFancy">Moustache Fancy</option>
+            <option value="MoustacheMagnum">Moustache Magnum</option>
+          </select>
+        </div>
+      </div>
+      <!-- Avatar Preview Panel -->
+      <div class="avatar-preview-area">
+        <img id="avatarImage" src="" alt="Avatar Preview">
+        <!-- Downloads Section placed just below the avatar image -->
+        <div class="downloads">
+          <button id="btnDownloadSVG" type="button">Download SVG</button>
+          <button id="btnDownloadPNG">Download PNG</button>
+          <button id="showReactBtn">Show React Code</button>
+          <button id="showImgBtn">Show &lt;img&gt; Code</button>
+        </div>
+        <!-- Code output area (hidden by default) -->
+        <pre id="codeOutput" style="display:none; background: rgba(255,255,255,0.8); color: #333; padding: 15px; border-radius: 8px; overflow-x: auto; margin-top: 15px;"></pre>
+      </div>
+      <!-- Right Control Panel -->
+      <div class="controls controls-right">
+        <div class="form-group">
+          <label for="clotheType">Clothing</label>
+          <select id="clotheType">
+            <option value="BlazerShirt">Blazer Shirt</option>
+            <option value="BlazerSweater">Blazer Sweater</option>
+            <option value="CollarSweater">Collar Sweater</option>
+            <option value="GraphicShirt">Graphic Shirt</option>
+            <option value="Hoodie">Hoodie</option>
+            <option value="Overall">Overall</option>
+            <option value="ShirtCrewNeck">Shirt Crew Neck</option>
+            <option value="ShirtScoopNeck">Shirt Scoop Neck</option>
+            <option value="ShirtVNeck">Shirt V Neck</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="eyeType">Eyes</label>
+          <select id="eyeType">
+            <option value="Close">Close</option>
+            <option value="Cry">Cry</option>
+            <option value="Default">Default</option>
+            <option value="Dizzy">Dizzy</option>
+            <option value="EyeRoll">Eye Roll</option>
+            <option value="Happy">Happy</option>
+            <option value="Hearts">Hearts</option>
+            <option value="Side">Side</option>
+            <option value="Squint">Squint</option>
+            <option value="Surprised">Surprised</option>
+            <option value="Wink">Wink</option>
+            <option value="WinkWacky">Wink Wacky</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="eyebrowType">Eyebrows</label>
+          <select id="eyebrowType">
+            <option value="Angry">Angry</option>
+            <option value="AngryNatural">Angry Natural</option>
+            <option value="Default">Default</option>
+            <option value="DefaultNatural">Default Natural</option>
+            <option value="FlatNatural">Flat Natural</option>
+            <option value="RaisedExcited">Raised Excited</option>
+            <option value="RaisedExcitedNatural">Raised Excited Natural</option>
+            <option value="SadConcerned">Sad Concerned</option>
+            <option value="SadConcernedNatural">Sad Concerned Natural</option>
+            <option value="UnibrowNatural">Unibrow Natural</option>
+            <option value="UpDown">Up Down</option>
+            <option value="UpDownNatural">Up Down Natural</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="mouthType">Mouth</label>
+          <select id="mouthType">
+            <option value="Concerned">Concerned</option>
+            <option value="Default">Default</option>
+            <option value="Disbelief">Disbelief</option>
+            <option value="Eating">Eating</option>
+            <option value="Grimace">Grimace</option>
+            <option value="Sad">Sad</option>
+            <option value="ScreamOpen">Scream Open</option>
+            <option value="Serious">Serious</option>
+            <option value="Smile">Smile</option>
+            <option value="Tongue">Tongue</option>
+            <option value="Twinkle">Twinkle</option>
+            <option value="Vomit">Vomit</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="skinColor">Skin Color</label>
+          <select id="skinColor">
+            <option value="Tanned">Tanned</option>
+            <option value="Yellow">Yellow</option>
+            <option value="Pale">Pale</option>
+            <option value="Light">Light</option>
+            <option value="Brown">Brown</option>
+            <option value="DarkBrown">Dark Brown</option>
+            <option value="Black">Black</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+ <!-- BEGIN NEW FOOTER -->
+ <footer class="site-footer">
+    <div class="footer-content">
+      <!-- Left side -->
+      <img 
+      src="Black and Yellow Creative Agency Logo.png" 
+      alt="Forge Tech Creative Agency" 
+      class="footer-logo"
+    />
+      <!-- Right side -->
+      <div class="footer-right">
+        <p class="copyright">
+            <p class="copyright">
+                <span class="line1">&copy; <span id="current-year"></span> Avatar Generator</span>
+                <span class="line2">
+                    <span class="powered">Powered by</span> Forge Tech Creative
+                  </span>
+              </p>
+          </p>
+      </div>
+    </div>
+  </footer>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <script>
+    // Get references to DOM elements
+    const avatarImage = document.getElementById('avatarImage');
+    const styleToggle = document.getElementById('avatarStyleToggle');
+    const selectElements = document.querySelectorAll('select');
+  
+    // Download and Code buttons
+    const btnDownloadSVG = document.getElementById('btnDownloadSVG');
+    const btnDownloadPNG = document.getElementById('btnDownloadPNG');
+    const showReactBtn = document.getElementById('showReactBtn');
+    const showImgBtn = document.getElementById('showImgBtn');
+    const codeOutput = document.getElementById('codeOutput');
+  
+    // Function to generate the avatar URL based on current selections
+    function generateURL() {
+      const style = styleToggle.checked ? 'Circle' : 'Transparent';
+      const baseURL = 'https://avataaars.io/';
+      let url = baseURL + '?avatarStyle=' + style;
+      url += '&topType=' + document.getElementById('topType').value;
+      url += '&accessoriesType=' + document.getElementById('accessoriesType').value;
+      url += '&hairColor=' + document.getElementById('hairColor').value;
+      url += '&facialHairType=' + document.getElementById('facialHairType').value;
+      url += '&clotheType=' + document.getElementById('clotheType').value;
+      url += '&eyeType=' + document.getElementById('eyeType').value;
+      url += '&eyebrowType=' + document.getElementById('eyebrowType').value;
+      url += '&mouthType=' + document.getElementById('mouthType').value;
+      url += '&skinColor=' + document.getElementById('skinColor').value;
+      avatarImage.src = url;
+      updateCodeSnippets(url);
+    }
+    
+    // Function to update code snippets inside the pre element
+    function updateCodeSnippets(url) {
+      const reactSnippet = `<Avatar
+    avatarStyle="${styleToggle.checked ? 'Circle' : 'Transparent'}"
+    topType="${document.getElementById('topType').value}"
+    accessoriesType="${document.getElementById('accessoriesType').value}"
+    hairColor="${document.getElementById('hairColor').value}"
+    facialHairType="${document.getElementById('facialHairType').value}"
+    clotheType="${document.getElementById('clotheType').value}"
+    eyeType="${document.getElementById('eyeType').value}"
+    eyebrowType="${document.getElementById('eyebrowType').value}"
+    mouthType="${document.getElementById('mouthType').value}"
+    skinColor="${document.getElementById('skinColor').value}"
+  />`;
+      const imgSnippet = `<img src="${url}" alt="Avatar"/>`;
+      
+      if (codeOutput.dataset.type === 'react') {
+        codeOutput.textContent = reactSnippet;
+      } else if (codeOutput.dataset.type === 'img') {
+        codeOutput.textContent = imgSnippet;
+      }
+    }
+    
+    // Event listeners: update URL when any selection changes
+    selectElements.forEach(select => {
+      select.addEventListener('change', generateURL);
+    });
+    styleToggle.addEventListener('change', generateURL);
+    
+    // Randomize button event
+    document.getElementById('randomBtn').addEventListener('click', () => {
+      selectElements.forEach(select => {
+        const opts = select.options;
+        select.selectedIndex = Math.floor(Math.random() * opts.length);
+      });
+      styleToggle.checked = Math.random() < 0.5;
+      generateURL();
+    });
+    
+    // Show React Code snippet
+    showReactBtn.addEventListener('click', () => {
+      codeOutput.dataset.type = 'react';
+      const style = styleToggle.checked ? 'Circle' : 'Transparent';
+      const reactSnippet = `<Avatar
+    avatarStyle="${style}"
+    topType="${document.getElementById('topType').value}"
+    accessoriesType="${document.getElementById('accessoriesType').value}"
+    hairColor="${document.getElementById('hairColor').value}"
+    facialHairType="${document.getElementById('facialHairType').value}"
+    clotheType="${document.getElementById('clotheType').value}"
+    eyeType="${document.getElementById('eyeType').value}"
+    eyebrowType="${document.getElementById('eyebrowType').value}"
+    mouthType="${document.getElementById('mouthType').value}"
+    skinColor="${document.getElementById('skinColor').value}"
+  />`;
+      codeOutput.textContent = reactSnippet;
+      codeOutput.style.display = 'block';
+    });
+    
+    // Show <img> Code snippet
+    showImgBtn.addEventListener('click', () => {
+      codeOutput.dataset.type = 'img';
+      const imgSnippet = `<img src="${avatarImage.src}" alt="Avatar"/>`;
+      codeOutput.textContent = imgSnippet;
+      codeOutput.style.display = 'block';
+    });
+    
+    // Initialize on page load
+    generateURL();
+    window.addEventListener('load', () => {
+      document.getElementById('mainContainer').classList.add('loaded');
+    });
+    
+    document.getElementById('current-year').innerText = new Date().getFullYear();
+  
+    // --------------------------
+    // Utility download functions
+    // --------------------------
+    // Trigger download using a Blob
+    function triggerDownload(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+  
+    // Trigger download directly using a URL
+    function triggerDownloadFromURL(url, filename) {
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  
+    // ------------------------------
+    // Updated Download Functions
+    // ------------------------------
+  
+    // UPDATED downloadSVG() Function:
+    async function downloadSVG() {
+  // Get the generated URL from your image source
+  const originalURL = avatarImage.src;
+  // Build the proxied URL by encoding the original URL as a query parameter
+  const proxiedURL = `http://localhost:3000/proxy?url=${encodeURIComponent(originalURL)}`;
+  
+  try {
+    // Fetch the SVG from your proxy server
+    const response = await fetch(proxiedURL);
+    if (!response.ok) {
+      console.error("Failed to fetch SVG for download:", response.status);
+      return;
+    }
+    // Convert the response to a Blob
+    const blob = await response.blob();
+    // Create a local object URL for the Blob
+    const blobURL = URL.createObjectURL(blob);
+    
+    // Create a temporary hidden anchor element, set its download attribute, and trigger a click
+    const a = document.createElement("a");
+    a.style.display = "none";
+    a.href = blobURL;
+    a.download = "avatar.svg";
+    document.body.appendChild(a);
+    a.click();
+    
+    // Clean up the DOM and object URL after a short delay
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobURL);
+    }, 100);
+  } catch (error) {
+    console.error("Error during downloadSVG:", error);
+  }
+}
+
+
+    // UPDATED downloadPNG() Function:
+    async function downloadPNG() {
+  const originalURL = avatarImage.src;
+  
+  // Build the proxied URL as above
+  const proxiedURL = `http://localhost:3000/proxy?url=${encodeURIComponent(originalURL)}`;
+  
+  try {
+    // Use the proxy URL to fetch the SVG content
+    const response = await fetch(proxiedURL);
+    if (!response.ok) {
+      console.error("Failed to fetch SVG for PNG conversion:", response.status);
+      return;
+    }
+    const svgData = await response.text();
+    const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+    const domURL = window.URL || window.webkitURL || window;
+    const blobURL = domURL.createObjectURL(svgBlob);
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement("canvas");
+      // Use naturalWidth/naturalHeight if available for better accuracy
+      const originalWidth = img.naturalWidth || img.width;
+      const originalHeight = img.naturalHeight || img.height;
+      const scaleFactor = 4;  // Adjust scale factor as needed for resolution
+      canvas.width = originalWidth * scaleFactor;
+      canvas.height = originalHeight * scaleFactor;
+      const ctx = canvas.getContext("2d");
+      ctx.scale(scaleFactor, scaleFactor);
+      ctx.drawImage(img, 0, 0);
+      domURL.revokeObjectURL(blobURL);
+      canvas.toBlob(function(blob) {
+        if (blob) {
+          triggerDownload(blob, "avatar.png");
+        } else {
+          console.error("Failed to convert canvas to blob.");
+        }
+      }, "image/png");
+    };
+    img.src = blobURL;
+  } catch (error) {
+    console.error("Error fetching the SVG for PNG conversion:", error);
+  }
+}
+
+    // Attach the updated download functions to the corresponding buttons
+    btnDownloadSVG.addEventListener("click", downloadSVG);
+    btnDownloadPNG.addEventListener("click", downloadPNG);
+  </script>
+  
+</body>
+</html>
