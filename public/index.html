@@ -871,7 +871,8 @@ scrollTriggers.forEach(el => {
   // Get the generated URL from your image source
   const originalURL = avatarImage.src;
   // Build the proxied URL by encoding the original URL as a query parameter
-  const proxiedURL = `http://localhost:3000/proxy?url=${encodeURIComponent(originalURL)}`;
+  const proxiedURL = `/.netlify/functions/proxy?url=${encodeURIComponent(originalURL)}`;
+
   
   try {
     // Fetch the SVG from your proxy server
@@ -909,7 +910,8 @@ scrollTriggers.forEach(el => {
   const originalURL = avatarImage.src;
   
   // Build the proxied URL as above
-  const proxiedURL = `http://localhost:3000/proxy?url=${encodeURIComponent(originalURL)}`;
+  const proxiedURL = `/.netlify/functions/proxy?url=${encodeURIComponent(originalURL)}`;
+
   
   try {
     // Use the proxy URL to fetch the SVG content
